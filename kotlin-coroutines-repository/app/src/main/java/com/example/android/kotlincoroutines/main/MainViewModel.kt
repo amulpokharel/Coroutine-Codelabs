@@ -122,15 +122,8 @@ class MainViewModel(private val repository: TitleRepository) : ViewModel() {
      * Refresh the title, showing a loading spinner while it refreshes and errors via snackbar.
      */
     fun refreshTitle() {
-        uiScope.launch {
-            try {
-                _spinner.value = true
-                repository.refreshTitle()
-            }catch (error: TitleRepository.TitleRefreshError){
-                _snackBar.value = error.message
-            }finally {
-                _spinner.value = false
-            }
+        launchDataLoad {
+            repository.refreshTitle()
         }
     }
 
@@ -146,5 +139,19 @@ class MainViewModel(private val repository: TitleRepository) : ViewModel() {
      *              lambda the loading spinner will display, after completion or error the loading
      *              spinner will stop
      */
-    // TODO: Add launchDataLoad here then refactor refreshTitle to use it
+
+    private fun launchDataLoad(block: suspend CoroutineScope.() -> Unit) : Job{
+        return  uiScope.launch {
+            try {
+                _spinner.value = true
+                block()
+            }catch (error:TitleRepository.TitleRefreshError){
+                _snackBar.value = error.message
+            }finally {
+                _spinner.value = false
+            }
+        }
+    }
+
 }
+
