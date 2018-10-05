@@ -21,6 +21,8 @@ import android.arch.lifecycle.Transformations
 import android.arch.lifecycle.ViewModel
 import com.example.android.kotlincoroutines.util.BACKGROUND
 import com.example.android.kotlincoroutines.util.ConsumableValue
+import kotlinx.coroutines.*
+import kotlinx.coroutines.android.Main
 
 /**
  * MainViewModel designed to store and manage UI-related data in a lifecycle conscious way. This
@@ -47,19 +49,22 @@ class MainViewModel : ViewModel() {
      */
     val snackbar = Transformations.map(_snackBar) { ConsumableValue(it) }
 
-    // TODO: Add viewModelJob and uiScope here
+    private val viewModelJob = Job()
+    private val uiScope = CoroutineScope(Dispatchers.Main + viewModelJob)
 
-    // TODO: Add onCleared() here to cancel viewModelJob
+    override fun onCleared() {
+        super.onCleared()
+        viewModelJob.cancel()
+    }
 
     /**
      * Wait one second then display a snackbar.
      */
     fun onMainViewClicked() {
-        // TODO: Replace with coroutine implementation
-        BACKGROUND.submit {
-            Thread.sleep(1_000)
+        uiScope.launch{
+            delay(1_000)
             // use postValue since we're in a background thread
-            _snackBar.postValue("Hello, from threads!")
+            _snackBar.postValue("Hello, from coroutines!")
         }
     }
 }
