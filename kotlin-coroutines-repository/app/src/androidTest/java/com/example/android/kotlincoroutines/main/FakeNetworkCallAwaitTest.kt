@@ -23,7 +23,7 @@ class FakeNetworkCallAwaitTest {
     fun whenFakeNetworkCallFailure_throws() {
         val subject = makeFailureCall(FakeNetworkException("the error"))
         runBlocking {
-            Truth.assertThat(subject.await()).isEqualTo("the title")
+            Truth.assertThat(subject.result).isEqualTo("the title")
         }
     }
 }
